@@ -179,6 +179,88 @@ function doStep() {
   // Write to trace log
   if (isMatch) → log as FOUND (green)
   else         → log as not a keyword (red)
+  // Skip spaces and punctuation
+  while (current token is NOT a word) → scanIndex++
+
+  // Check if we reached the end
+  if (scanIndex >= tokens.length) → finishSearch()
+
+  // Get current word
+  const token = tokens[scanIndex]
+
+  // ── CORE LINEAR SEARCH COMPARISON ──────────────
+  comparisons += keywords.length      // count the checks
+  const isMatch = keywords.includes(token.clean)   // ← THE CHECK
+  // ────────────────────────────────────────────────
+
+  // Highlight word on screen
+  renderTokens(scanIndex, isMatch ? 'found' : 'scanning')
+
+  // Write to trace log
+  if (isMatch) → log as FOUND (green)
+  else         → log as not a keyword (red)
+
+  // Move to next word
+  scanIndex++
+
+  // Auto mode → schedule next step
+  if (isRunning && !stepMode) → setTimeout(doStep, speed)
+}
+```
+
+---
+
+## 🆚 Linear Search vs Binary Search
+
+| | Linear Search | Binary Search |
+|---|---|---|
+| **Data requirement** | Works on any data — sorted or unsorted | Requires sorted data only |
+| **Time complexity** | O(n) | O(log n) |
+| **Finds all occurrences** | Yes | No — stops at first match |
+| **Implementation** | Simple — one loop | Complex — divide and conquer |
+| **Used in this project** | ✅ Yes | ❌ Cannot use — paragraph is unsorted |
+
+---
+
+## ❓ Viva Quick Reference
+
+**Q: Why linear search for a paragraph?**
+A: A paragraph is unsorted text. Binary search requires sorted data. Linear search works on any data — making it the only correct choice here.
+
+**Q: What is the time complexity?**
+A: O(n × k) — n words × k keywords. Worst case is when the keyword is the last word or absent.
+
+**Q: How does the trace log prove linear search?**
+A: Every word appears in order [1], [2], [3]... No word is skipped. The comparison count equals exactly n × k.
+
+**Q: What does scanIndex do?**
+A: It is the pointer that moves from 0 to n-1, one step at a time. It is the variable that makes the search linear.
+
+**Q: What is tokenization?**
+A: Breaking the paragraph into individual word objects so the algorithm can compare them one by one.
+
+---
+
+## 🛠️ Technologies Used
+
+- **HTML5** — Structure and layout
+- **CSS3** — Styling, animations, color highlights
+- **Vanilla JavaScript** — All algorithm logic, DOM manipulation, timers
+
+No external libraries. No frameworks. No build tools.
+
+---
+
+## 👨‍💻 Project Info
+
+- **Type:** Problem Based Learning (PBL) — Engineering
+- **Topic:** Applied Algorithms — Linear Search
+- **Language:** HTML + CSS + JavaScript
+- **Algorithm:** Linear Search — O(n × k)
+
+---
+
+*Built as a PBL project to demonstrate Linear Search Algorithm with real-time visualization.*
 
   // Move to next word
   scanIndex++
