@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Keyword Finder - Linear Search</title>
+  <style>
+
+    /* ── RESET & BASE ── */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      padding: 2rem;
+    }
+
+    .app {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* ── PANELS ── */
+    .panel {
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .panel-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #999;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px 14px;
+      resize: vertical;
+      color: #1a1a1a;
+      background: #fafafa;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #aaa;
+    }
+
+    /* ── KEYWORD INPUT ROW ── */
+    .keyword-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .kw-input {
+      flex: 1;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 12px;
+      background: #fafafa;
+    }
+
+    .kw-input:focus {
+      outline: none;
+      border-color: #aaa;
+    }
+
+    /* ── KEYWORD TAGS ── */
+    .kw-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .kw-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: #fef9c3;
+      color: #854d0e;
+      border: 1px solid #fde68a;
+    }
+
+    .kw-tag button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #854d0e;
+      line-height: 1;
+      padding: 0;
+      opacity: 0.6;
+    }
+
+    .kw-tag button:hover { opacity: 1; }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      background: white;
+      color: #1a1a1a;
+      transition: all 0.15s;
+    }
+
+    .btn:hover { background: #f5f5f0; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: #1a1a1a;
+      color: white;
+      border-color: #1a1a1a;
+    }
+
+    .btn-primary:hover { background: #333; }
+
+    .btn-step {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    .btn-step:hover { background: #bfdbfe; }
+
+    /* ── SPEED ROW ── */
+    .speed-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      display: none;
+    }
+
+    .progress-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+      flex-shrink: 0;
+    }
+
+    .status-dot.running { background: #f59e0b; }
+    .status-dot.done    { background: #22c55e; }
+
+    .progress-track {
+      background: #e5e5e5;
+      border-radius: 4px;
+      height: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #3b82f6;
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.15s;
+    }
+
+    /* ── RESULT PARAGRAPH ── */
+    .result-para {
+      font-size: 15px;
+      line-height: 2.2;
+    }
+
+    .word-token {
+      border-radius: 4px;
+      padding: 1px 3px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* Yellow = currently being scanned */
+    .word-scanning {
+      background: #fef9c3;
+      color: #854d0e;
+      outline: 2px solid #fde68a;
+      border-radius: 4px;
+    }
+
+    /* Green = keyword found */
+    .word-found {
+      background: #dcfce7;
+      color: #166534;
+      font-weight: 700;
+      border-radius: 4px;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: #f5f5f0;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    /* ── TRACE LOG ── */
+    .trace-box {
+      background: #1a1a1a;
+      color: #ccc;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.9;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .trace-found { color: #86efac; }   /* green  = found     */
+    .trace-miss  { color: #f87171; }   /* red    = not found */
+    .trace-info  { color: #93c5fd; }   /* blue   = info      */
+
+    /* ── CONCEPT BOX ── */
+    .concept {
+      background: #eff6ff;
+      border-left: 3px solid #3b82f6;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #374151;
+      line-height: 1.7;
+    }
+
+    .concept strong { color: #1a1a1a; }
+
+  </style>
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="badge">PBL Project · Applied Algorithms</div>
+      <h1>Keyword Finder using Linear Search</h1>
+      <p>Enter a paragraph and keywords — watch Linear Search scan word by word</p>
+    </div>
+
+    <!-- CONCEPT BOX -->
+    <div class="concept">
+      <strong>What is Linear Search?</strong>
+      It checks every element one by one, from start to end, until it finds a match or runs out of elements.
+      Time Complexity: <strong>O(n × k)</strong> — n = words in paragraph, k = number of keywords.
+      It never skips a word — that is what makes it <em>linear</em>.
+    </div>
+
+    <!-- PARAGRAPH INPUT -->
+    <div class="panel">
+      <div class="panel-label">Paragraph</div>
+      <textarea id="para-input">Machine learning is a part of artificial intelligence. Data science uses algorithms to find patterns in large datasets. Python is popular for AI development and research.</textarea>
+    </div>
+
+    <!-- KEYWORD INPUT -->
+    <div class="panel">
+      <div class="panel-label">Keywords to Search</div>
+      <div class="keyword-row">
+        <input class="kw-input" id="kw-input" placeholder="Type a keyword and press Enter..." />
+        <button class="btn" onclick="addKeyword()">+ Add</button>
+      </div>
+      <div class="kw-tags" id="kw-tags"></div>
+    </div>
+
+    <!-- CONTROL BUTTONS -->
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="runSearch()">▶ Run Search</button>
+      <button class="btn btn-step"    onclick="stepSearch()" id="step-btn">Step → Next Word</button>
+      <button class="btn"             onclick="resetAll()">↺ Reset</button>
+      <div class="speed-row">
+        <span>Speed</span>
+        <input type="range" id="speed-slider" min="100" max="1500" value="600" step="100">
+        <span id="speed-label">600ms</span>
+      </div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-header">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Ready</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- RESULT DISPLAY (hidden until search runs) -->
+    <div class="panel" id="result-panel" style="display:none">
+      <div class="panel-label">Paragraph — Word by Word Scan</div>
+      <div class="result-para" id="result-display"></div>
+    </div>
+
+    <!-- STATS (hidden until search runs) -->
+    <div class="stats-row" id="stats-row" style="display:none">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-words">0</div>
+        <div class="stat-label">Words scanned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-found">0</div>
+        <div class="stat-label">Keywords found</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-comparisons">0</div>
+        <div class="stat-label">Comparisons made</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-time">0ms</div>
+        <div class="stat-label">Time taken</div>
+      </div>
+    </div>
+
+    <!-- ALGORITHM TRACE LOG (hidden until search runs) -->
+    <div id="trace-wrap" style="display:none">
+      <div class="panel-label" style="margin-bottom:6px">Algorithm Trace Log</div>
+      <div class="trace-box" id="trace-log"></div>
+    </div>
+
+  </div><!-- end .app -->
+
+  <script>
+
+    // ════════════════════════════════════════════════════
+    //  STATE VARIABLES
+    //  These hold all the data our search needs
+    // ════════════════════════════════════════════════════
+
+    let keywords    = ['learning', 'algorithms', 'Python', 'data'];
+    let tokens      = [];     // list of every word/space in the paragraph
+    let scanIndex   = 0;      // index of the word we are checking RIGHT NOW
+    let comparisons = 0;      // total comparisons made so far
+    let foundCount  = 0;      // how many keyword matches found
+    let isRunning   = false;  // true = auto scan is active
+    let stepMode    = false;  // true = user is stepping manually
+    let animTimer   = null;   // holds setTimeout so we can cancel it
+    let startTime   = 0;      // records when search started (for timing)
+    let totalWords  = 0;      // total word count in paragraph
+
+
+    // ════════════════════════════════════════════════════
+    //  KEYWORD TAG FUNCTIONS
+    // ════════════════════════════════════════════════════
+
+    function renderTags() {
+      const wrap = document.getElementById('kw-tags');
+      wrap.innerHTML = '';
+
+      keywords.forEach(function(kw, index) {
+        const tag = document.createElement('div');
+        tag.className = 'kw-tag';
+        tag.innerHTML = kw + ' <button onclick="removeKeyword(' + index + ')">×</button>';
+        wrap.appendChild(tag);
+      });
+    }
+
+    function addKeyword() {
+      const input = document.getElementById('kw-input');
+      const val   = input.value.trim();
+
+      if (val !== '' && !keywords.includes(val)) {
+        keywords.push(val);
+        renderTags();
+      }
+      input.value = '';
+      input.focus();
+    }
+
+    function removeKeyword(index) {
+      keywords.splice(index, 1);
+      renderTags();
+    }
+
+    // Press Enter to add keyword
+    document.getElementById('kw-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') addKeyword();
+    });
+
+    // Speed slider: update label
+    document.getElementById('speed-slider').addEventListener('input', function() {
+      document.getElementById('speed-label').textContent = this.value + 'ms';
+    });
+
+    // Load tags on startup
+    renderTags();
+
+
+    // ════════════════════════════════════════════════════
+    //  TOKENIZER
+    //  Breaks the paragraph into a list of word objects
+    //  and space/punctuation objects (for display only)
+    // ════════════════════════════════════════════════════
+
+    function tokenize(text) {
+      const result = [];
+      // This regex matches either: a word (letters) OR a non-word (spaces, punctuation)
+      const regex  = /([a-zA-Z']+|[^a-zA-Z']+)/g;
+      let wordCount = 0;
+      let match;
+
+      while ((match = regex.exec(text)) !== null) {
+        const piece = match[0];
+
+        if (/[a-zA-Z]/.test(piece)) {
+          // It's a real word → save it with a cleaned version for comparison
+          result.push({
+            word:   piece,
+            clean:  piece.replace(/[^a-zA-Z]/g, '').toLowerCase(),
+            isWord: true,
+            idx:    wordCount++
+          });
+        } else {
+          // It's a space or punctuation → keep it just for display
+          result.push({
+            word:   piece,
+            isWord: false
+          });
+        }
+      }
+
+      return result;
+    }
+
+
+    // ════════════════════════════════════════════════════
+    //  RENDER TOKENS
+    //  Draws the paragraph on screen word by word
+    //  and applies highlight colors
+    // ════════════════════════════════════════════════════
+
+    function renderTokens(highlightIdx, state) {
+      const display = document.getElementById('result-display');
+      const kwLower = keywords.map(function(k) { return k.toLowerCase(); });
+      display.innerHTML = '';
+
+      tokens.forEach(function(tok, i) {
+
+        // Non-words (spaces, commas etc.) → plain text, no highlight
+        if (!tok.isWord) {
+          display.appendChild(document.createTextNode(tok.word));
+          return;
+        }
+
+        const span = document.createElement('span');
+        span.className   = 'word-token';
+        span.textContent = tok.word;
+
+        if (i === highlightIdx) {
+          // THIS word is being scanned right now
+          if (state === 'found') {
+            span.classList.add('word-found');     // green
+          } else {
+            span.classList.add('word-scanning');  // yellow
+          }
+        } else if (i < highlightIdx) {
+          // Already scanned → if it was a keyword, keep it green
+          if (kwLower.includes(tok.clean)) {
+            span.classList.add('word-found');
+          }
+        }
+
+        display.appendChild(span);
+      });
+    }
+
+
+    // ════════════════════════════════════════════════════
+    //  LOG FUNCTION
+    //  Adds one line to the algorithm trace log
+    // ════════════════════════════════════════════════════
+
+    function log(msg, cls) {
+      const box  = document.getElementById('trace-log');
+      const line = document.createElement('div');
+      if (cls) line.className = cls;
+      line.textContent = msg;
+      box.appendChild(line);
+      box.scrollTop = box.scrollHeight;  // auto-scroll to bottom
+    }
+
+
+    // ════════════════════════════════════════════════════
+    //  LINEAR SEARCH — ONE STEP
+    //
+    //  CONCEPT (for your viva):
+    //  - tokens[] is our array of words  →  [word0, word1, word2, ...]
+    //  - scanIndex starts at 0 and goes up by 1 each call
+    //  - At each position we compare the word with every keyword
+    //  - If it matches → FOUND (green), log it
+    //  - If not → NOT FOUND (move on silently)
+    //  - We NEVER skip any word — we always go left to right
+    //  - This straight-line checking is what makes it LINEAR SEARCH
+    // ════════════════════════════════════════════════════
+
+    function doStep() {
+
+      // Skip non-word tokens (spaces, punctuation)
+      while (scanIndex < tokens.length && !tokens[scanIndex].isWord) {
+        scanIndex++;
+      }
+
+      // If we've reached the end → search is complete
+      if (scanIndex >= tokens.length) {
+        finishSearch();
+        return;
+      }
+
+      const token   = tokens[scanIndex];
+      const kwLower = keywords.map(function(k) { return k.toLowerCase(); });
+
+      // ── THIS IS THE CORE LINEAR SEARCH COMPARISON ──────
+      // We compare this word against EVERY keyword (one by one)
+      comparisons += keywords.length;
+
+      const isMatch = kwLower.includes(token.clean);  // ← the actual check
+      // ───────────────────────────────────────────────────
+
+      // Highlight the word on screen
+      renderTokens(scanIndex, isMatch ? 'found' : 'scanning');
+
+      // Update stats on screen
+      document.getElementById('stat-comparisons').textContent = comparisons;
+      document.getElementById('stat-words').textContent       = token.idx + 1;
+
+      // Update progress bar
+      const progress = Math.round(((token.idx + 1) / totalWords) * 100);
+      document.getElementById('progress-fill').style.width = progress + '%';
+      document.getElementById('status-text').textContent =
+        'Scanning word ' + (token.idx + 1) + ' of ' + totalWords + ': "' + token.word + '"';
+
+      // Write to trace log
+      if (isMatch) {
+        foundCount++;
+        document.getElementById('stat-found').textContent = foundCount;
+        log('[' + (token.idx + 1) + '] "' + token.word + '" ✓  FOUND — keyword match!', 'trace-found');
+      } else {
+        log('[' + (token.idx + 1) + '] "' + token.word + '" ✗  not a keyword', 'trace-miss');
+      }
+
+      // Move pointer to next word
+      scanIndex++;
+
+      // If auto mode → schedule the next step after a delay
+      if (isRunning && !stepMode) {
+        const speed = parseInt(document.getElementById('speed-slider').value);
+        animTimer   = setTimeout(doStep, speed);
+      }
+    }
+
+
+    // ════════════════════════════════════════════════════
+    //  FINISH SEARCH
+    //  Called when all words have been scanned
+    // ════════════════════════════════════════════════════
+
+    function finishSearch() {
+      isRunning = false;
+      stepMode  = false;
+
+      const elapsed = Date.now() - startTime;
+      document.getElementById('stat-time').textContent = elapsed + 'ms';
+
+      document.getElementById('status-dot').className  = 'status-dot done';
+      document.getElementById('status-text').textContent =
+        'Search complete — ' + foundCount + ' keyword(s) found in ' + comparisons + ' comparisons';
+      document.getElementById('progress-fill').style.width = '100%';
+
+      log('', '');
+      log('── Search complete ─────────────────────────────', 'trace-info');
+      log('  Keywords found  : ' + foundCount,               'trace-info');
+      log('  Total comparisons: ' + comparisons,             'trace-info');
+      log('  Time taken      : ' + elapsed + 'ms',           'trace-info');
+      log('────────────────────────────────────────────────', 'trace-info');
+
+      // Final render: show all found keywords green, no yellow scanner
+      const kwLower = keywords.map(function(k) { return k.toLowerCase(); });
+      const display = document.getElementById('result-display');
+      display.innerHTML = '';
+      tokens.forEach(function(tok) {
+        if (!tok.isWord) {
+          display.appendChild(document.createTextNode(tok.word));
+          return;
+        }
+        const span = document.createElement('span');
+        span.className   = 'word-token';
+        span.textContent = tok.word;
+        if (kwLower.includes(tok.clean)) span.classList.add('word-found');
+        display.appendChild(span);
+      });
+    }
+
+
+    // ════════════════════════════════════════════════════
+    //  PREPARE SEARCH
+    //  Resets everything and shows the panels
+    // ════════════════════════════════════════════════════
+
+    function prepareSearch() {
+      if (animTimer) clearTimeout(animTimer);
+
+      // Tokenize the paragraph
+      tokens     = tokenize(document.getElementById('para-input').value);
+      totalWords = tokens.filter(function(t) { return t.isWord; }).length;
+
+      // Reset counters
+      scanIndex   = 0;
+      comparisons = 0;
+      foundCount  = 0;
+
+      // Show all panels
+      document.getElementById('result-panel').style.display = 'block';
+      document.getElementById('stats-row').style.display    = 'grid';
+      document.getElementById('trace-wrap').style.display   = 'block';
+      document.getElementById('progress-wrap').style.display = 'block';
+
+      // Reset stats display
+      document.getElementById('stat-words').textContent       = '0';
+      document.getElementById('stat-found').textContent       = '0';
+      document.getElementById('stat-comparisons').textContent = '0';
+      document.getElementById('stat-time').textContent        = '0ms';
+      document.getElementById('progress-fill').style.width   = '0%';
+      document.getElementById('status-dot').className        = 'status-dot running';
+      document.getElementById('status-text').textContent     = 'Starting scan...';
+
+      // Clear trace log and write header
+      document.getElementById('trace-log').innerHTML = '';
+      log('── Linear Search started ────────────────────────', 'trace-info');
+      log('  Paragraph words : ' + totalWords,                'trace-info');
+      log('  Keywords        : ' + keywords.join(', '),       'trace-info');
+      log('────────────────────────────────────────────────', 'trace-info');
+
+      // Render paragraph (no highlights yet)
+      renderTokens(-1, null);
+    }
+
+
+    // ════════════════════════════════════════════════════
+    //  BUTTON HANDLERS
+    // ════════════════════════════════════════════════════
+
+    // ▶ Run Search — auto mode, scans all words automatically
+    function runSearch() {
+      if (keywords.length === 0) {
+        alert('Please add at least one keyword!');
+        return;
+      }
+      prepareSearch();
+      isRunning = true;
+      stepMode  = false;
+      startTime = Date.now();
+      doStep();
+    }
+
+    // Step → Next Word — manual mode, one word per click
+    function stepSearch() {
+      if (!isRunning) {
+        // First click: set up search
+        if (keywords.length === 0) {
+          alert('Please add at least one keyword!');
+          return;
+        }
+        prepareSearch();
+        isRunning = true;
+        stepMode  = true;
+        startTime = Date.now();
+      }
+      // Each click: process one more word
+      doStep();
+    }
+
+    // ↺ Reset — clear everything
+    function resetAll() {
+      if (animTimer) clearTimeout(animTimer);
+      isRunning  = false;
+      stepMode   = false;
+      scanIndex  = 0;
+      comparisons = 0;
+      foundCount  = 0;
+
+      document.getElementById('result-panel').style.display  = 'none';
+      document.getElementById('stats-row').style.display     = 'none';
+      document.getElementById('trace-wrap').style.display    = 'none';
+      document.getElementById('progress-wrap').style.display = 'none';
+    }
+
+  </script>
+</body>
+</html>
