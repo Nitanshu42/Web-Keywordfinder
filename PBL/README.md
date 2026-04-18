@@ -105,7 +105,7 @@ In GTK+, when a user clicks a button, a "signal" triggers a "callback function".
 
 ## 4. Main Function (`main()`)
 
-The `main` function is exclusively responsible for painting the application window and assembling the UI blocks.
+The `main` function is exclusively responsible for painting the application window and assembling the UI blocks .
 
 *   **Initialization (`gtk_init`):** Bootstraps the GTK windowing environment.
 *   **Window Creation:** Generates a 400x300 pixel window titled "Word Dictionary (BST)".
